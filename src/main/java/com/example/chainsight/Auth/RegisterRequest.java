@@ -1,20 +1,18 @@
-// RegisterRequest.java
 package com.example.chainsight.Auth;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
     private String username;
+    private String email;
     private String password;
-
-    public CharSequence getPassword() {
-    }
-
-    public Object getUsername() {
-    }
+    private String confirmPassword;
+    private String walletAddress;
+    private String blockchainType;
+    private String otherBlockchain; // Only used when blockchainType is "other"
+    private boolean rememberMe;
 }

@@ -1,47 +1,87 @@
-// AuthenticationService.java
 package com.example.chainsight.Auth;
 
-import com.example.chainsight.Repository.UserRepository;
+import com.example.chainsight.Entity.Role;
 import com.example.chainsight.Config.JwtService;
 import com.example.chainsight.Entity.User;
-import lombok.AllArgsConstructor;
+import com.example.chainsight.Repository.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-@Service
-@AllArgsConstructor
-public class AuthenticationService {
+import java.util.Optional;
 
+@Service
+@RequiredArgsConstructor
+public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
-        User user = User.builder()
-                .username(request.getUsername())
+        var user = User.builder()
+                .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role("USER")
+                .walletAddress(request.getWalletAddress())
+                .blockchainType(request.getBlockchainType())
+                .role(Role.USER)
                 .build();
+
         userRepository.save(user);
-        String token = jwtService.generateToken(user);
-        return new AuthResponse(token);
+        var token = jwtService.generateToken(user);
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .walletAddress(user.getWalletAddress())
+                .authenticationMethod("email")
+                .role(user.getRole())
+                .build();
     }
 
     public AuthResponse authenticate(LoginRequest request) {
-        try {
-            Authentication auth = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-        } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid credentials");
+        if (request.isWalletLogin()) {
+            return handleWalletLogin(request);
+        } else {
+            return handleEmailLogin(request);
         }
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        String token = jwtService.generateToken(user);
-        return new AuthResponse(token);
+    }
+
+    private AuthResponse handleEmailLogin(LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password"));
+
+        var token = jwtService.generateToken(user);
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .walletAddress(user.getWalletAddress())
+                .authenticationMethod("email")
+                .role(user.getRole())
+                .build();
+    }
+
+    private AuthResponse handleWalletLogin(LoginRequest request) {
+        var user = userRepository.findByWalletAddress(request.getWalletAddress())
+                .orElseThrow(() -> new IllegalArgumentException("Wallet not registered"));
+
+        // Verify the blockchain type matches if needed
+        if (request.getBlockchainType() != null &&
+                !request.getBlockchainType().equalsIgnoreCase(user.getBlockchainType())) {
+            throw new IllegalArgumentException("Wallet blockchain mismatch");
+        }
+
+        var token = jwtService.generateToken(user);
+        return AuthResponse.builder()
+                .token(token)
+                .email(user.getEmail())
+                .walletAddress(user.getWalletAddress())
+                .authenticationMethod("wallet")
+                .role(user.getRole())
+                .build();
     }
 }

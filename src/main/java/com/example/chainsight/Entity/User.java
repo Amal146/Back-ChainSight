@@ -1,67 +1,85 @@
 package com.example.chainsight.Entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "users")
-public class User {
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
     @Id
+    @GeneratedValue
     private UUID userId;
 
+    @Column(unique = true, nullable = false)
+    private String username;
+
+    @Column(unique = true)
     private String email;
+
     private String password;
-    private String role;
+
+    @Column(unique = true)
+    private String walletAddress;
+
+    private String blockchainType; // "ethereum", "binance", "hedera", etc.
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
+    @CreationTimestamp
     private LocalDateTime createdAt;
 
-    // Getters, Setters, Constructors
+    private boolean isWalletUser; // Flag to distinguish wallet-only users
 
-    public UUID getUserId() {
-        return userId;
+    // Additional helper methods
+    public boolean isWalletLoginEnabled() {
+        return walletAddress != null && !walletAddress.isEmpty();
     }
 
-    public void setUserId(UUID userId) {
-        this.userId = userId;
+    public boolean isEmailLoginEnabled() {
+        return email != null && !email.isEmpty() && password != null && !password.isEmpty();
+    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    public String getEmail() {
-        return email;
+    @Override
+    public String getUsername() {
+        return email; // or username, depending on your login identifier
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public String getPassword() {
-        return password;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public User(UUID userId, String email, String password, String role, LocalDateTime createdAt) {
-        this.userId = userId;
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.createdAt = createdAt;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
