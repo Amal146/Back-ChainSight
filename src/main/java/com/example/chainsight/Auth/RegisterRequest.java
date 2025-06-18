@@ -1,5 +1,6 @@
 package com.example.chainsight.Auth;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter
@@ -7,6 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequest {
+    @NotBlank(message = "Username is required")
     private String username;
     private String email;
     private String password;

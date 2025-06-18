@@ -21,10 +21,11 @@ import java.util.UUID;
 @Builder
 public class User implements UserDetails {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "userid", columnDefinition = "UUID")
     private UUID userId;
 
-    @Column(unique = true, nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(unique = true)
@@ -32,15 +33,17 @@ public class User implements UserDetails {
 
     private String password;
 
-    @Column(unique = true)
+    @Column(name = "wallet_address", unique = true)
     private String walletAddress;
 
+    @Column(name = "blockchain_type")
     private String blockchainType; // "ethereum", "binance", "hedera", etc.
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @CreationTimestamp
+    @Column(name = "createdat", nullable = false)
     private LocalDateTime createdAt;
 
     private boolean isWalletUser; // Flag to distinguish wallet-only users

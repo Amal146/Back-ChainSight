@@ -1,8 +1,13 @@
 package com.example.chainsight.Entity;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.*;
 
+@Setter
+@Getter
 @Entity
 public class Wallet {
     @Id
@@ -18,54 +23,6 @@ public class Wallet {
 
     @OneToMany(mappedBy = "wallet")
     private List<Transaction> transactions;
-
-    public UUID getWalletId() {
-        return walletId;
-    }
-
-    public void setWalletId(UUID walletId) {
-        this.walletId = walletId;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public String getLabel() {
-        return label;
-    }
-
-    public void setLabel(String label) {
-        this.label = label;
-    }
-
-    public Blockchain getBlockchain() {
-        return blockchain;
-    }
-
-    public void setBlockchain(Blockchain blockchain) {
-        this.blockchain = blockchain;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
 
     public Wallet(UUID walletId, String address, String label, Blockchain blockchain, User user, List<Transaction> transactions) {
         this.walletId = walletId;

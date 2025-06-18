@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -25,14 +26,14 @@ public class WalletController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Wallet> getWalletById(@PathVariable Long id) {
+    public ResponseEntity<Wallet> getWalletById(@PathVariable UUID id) {
         return walletService.getWalletById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/user/{userId}")
-    public List<Wallet> getWalletsByUserId(@PathVariable Long userId) {
+    public List<Wallet> getWalletsByUserId(@PathVariable UUID userId) {
         return walletService.getWalletsByUserId(userId);
     }
 
@@ -42,7 +43,7 @@ public class WalletController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWallet(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteWallet(@PathVariable UUID id) {
         walletService.deleteWallet(id);
         return ResponseEntity.noContent().build();
     }

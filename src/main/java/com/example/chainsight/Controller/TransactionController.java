@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -32,7 +33,7 @@ public class TransactionController {
     }
 
     @GetMapping("/wallet/{walletId}")
-    public List<Transaction> getTransactionsByWalletId(@PathVariable Long walletId) {
+    public List<Transaction> getTransactionsByWalletId(@PathVariable UUID walletId) {
         return transactionService.getTransactionsByWalletId(walletId);
     }
 
