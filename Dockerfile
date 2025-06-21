@@ -1,10 +1,10 @@
 # Build stage
 FROM gradle:8.7.0-jdk17 AS build
 WORKDIR /app
-COPY backend/build.gradle .
-COPY backend/settings.gradle .
-COPY backend/gradle ./gradle
-COPY backend/src ./src
+COPY build.gradle .
+COPY settings.gradle .
+COPY gradle ./gradle
+COPY src ./src
 RUN gradle bootJar --no-daemon -x test
 
 # Run stage
