@@ -1,13 +1,11 @@
-# Use a JDK base image
+# Stage 1: Build
 FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
 COPY . .
-
-# Give execute permission and build using wrapper
 RUN chmod +x ./gradlew
 RUN ./gradlew build -x test
 
-# Runtime image
+# Stage 2: Run
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
