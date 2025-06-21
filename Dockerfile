@@ -1,16 +1,15 @@
-# Use a Gradle image to build the application
-FROM gradle:8.5-jdk17 AS builder
+# Use a JDK base image
+FROM eclipse-temurin:17-jdk AS builder
 WORKDIR /app
-COPY --chown=gradle:gradle . .
-RUN gradle build -x test
+COPY . .
 
-# Use a minimal JDK image to run the application
+# Give execute permission and build using wrapper
+RUN chmod +x ./gradlew
+RUN ./gradlew build -x test
+
+# Runtime image
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=builder /app/build/libs/*.jar app.jar
-
-# Expose the default Spring Boot port
 EXPOSE 8080
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
