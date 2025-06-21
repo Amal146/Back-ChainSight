@@ -1,12 +1,16 @@
-# Build stage
-FROM gradle:8.7.0-jdk17 AS build
+# Use a Gradle image to build the application
+FROM gradle:8.5-jdk17 AS builder
 WORKDIR /app
-COPY . .
-RUN gradle bootJar --no-daemon --stacktrace -x test
+COPY --chown=gradle:gradle . .
+RUN gradle build -x test
 
-# Run stage
-FROM eclipse-temurin:17-jdk-alpine
+# Use a minimal JDK image to run the application
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
+COPY --from=builder /app/build/libs/*.jar app.jar
+
+# Expose the default Spring Boot port
 EXPOSE 8080
+
+# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
