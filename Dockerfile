@@ -1,14 +1,14 @@
-# Use a lightweight OpenJDK image
-FROM eclipse-temurin:17-jdk-alpine
-
-# Set the working directory in the container
+FROM maven:3.9.7-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copy the built jar from the host to the container
-COPY target/*.jar app.jar
-
-# Expose port 8080 (or your app's configured port)
+# Use a lightweight JRE image to run the app
+FROM eclipse-temurin:17-jdk-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
