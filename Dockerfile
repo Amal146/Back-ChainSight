@@ -2,7 +2,9 @@
 FROM eclipse-temurin:17-jdk as builder
 WORKDIR /app
 COPY . .
-RUN ./gradlew build
+# Set execute permission for gradlew and build
+RUN chmod +x gradlew && \
+    ./gradlew build
 
 # Stage 2: Run
 FROM eclipse-temurin:17-jdk
